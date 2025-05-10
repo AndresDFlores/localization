@@ -12,6 +12,9 @@ class AStar:
         #  define start and end points
         self.flags = [255, -255]
 
+        #  track all steps agent has taken
+        self.history=[]
+
 
 
     #  this method updates the instance updates the global_score_map class variable, which characterizes each map cell
@@ -167,9 +170,15 @@ class AStar:
             for col_idx, col in enumerate(row):
 
 
+                cell_coord = col['global_coord']
                 cell_val=col['cell_val']
 
-                #  ignore obstacle cells
+
+                #  skip steps into cells that were previously stepped into
+                if cell_coord in self.history:
+                    continue
+
+                #  skip obstacle cells
                 if cell_val==1:
                     continue
 
@@ -190,7 +199,7 @@ class AStar:
 
 # --- DEV TOOLS ---
 
-    def get_isolated_key_view(self,dict_key):
+    def get_isolated_key_view(self, dict_key):
 
         isolated_data = []
         for row in self.global_score_map:
@@ -217,3 +226,60 @@ class AStar:
             kernel_scores.append(row_scores)
 
         return kernel_scores
+    
+
+    @staticmethod
+    def get_dir_char(pt1:tuple, pt2:tuple):
+
+        y1,x1=pt1
+        y2,x2=pt2
+
+        # right
+        if x1<x2:
+
+            # down
+            if y1<y2:
+                dir_char='\\'
+
+            # up
+            elif y1>y2:
+                dir_char='/'
+
+            # no vertical movement
+            elif y1==y2:
+                dir_char='\u2192'
+
+
+        # left
+        elif x1>x2:
+
+            # down
+            if y1<y2:
+                dir_char='/'
+
+            # up
+            elif y1>y2:
+                dir_char='\\'
+
+            # no vertical movement
+            elif y1==y2:
+                dir_char='\u2190'
+
+
+        #  no horizontal movement
+        elif x1==x2:
+
+            # down
+            if y1<y2:
+                dir_char='\u2193'
+
+            # up
+            elif y1>y2:
+                dir_char='\u2191'
+
+            # no vertical movement
+            elif y1==y2:
+                dir_char='o'
+
+
+        return dir_char

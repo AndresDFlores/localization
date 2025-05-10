@@ -3,7 +3,7 @@ from a_star import *
 
 
 # import obstacle map
-map = pd.read_excel(r'map.xlsx', sheet_name='Sheet6')
+map = pd.read_excel(r'map.xlsx', sheet_name='Sheet9')
 
 map_dims = map.shape
 path_ = [[0 for _ in range(map_dims[-1])] for _ in range(map_dims[0])]
@@ -34,8 +34,12 @@ focus_cell = flag_indices[255]  # this is the start cell index coordinate
 
 
 #  ---  ALGORITHM  ---
-# while True:
-while iter<4:
+while True:
+# while iter<8:
+
+    #  log step history
+    a_star_class.history.append(focus_cell)
+
     
     #  confirm that the focus cell is either open (0) or destination (-255)
     focus_cell_val = a_star_class.binary_map[focus_cell[0]][focus_cell[-1]]
@@ -60,6 +64,7 @@ while iter<4:
     for kernel_row_idx, kernel_row in enumerate(kernel_coords):
         for kernel_col_idx, _ in enumerate(kernel_row):
 
+            print('\n')
 
             #  get global map cell coordinates associated from kernel cell
             global_map_coord = kernel_coords[kernel_row_idx][kernel_col_idx]
@@ -68,11 +73,6 @@ while iter<4:
             #  get global map cell value (0, -1, 255, -255) for kernel cells
             global_map_cell = a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]
             global_map_cell_val = global_map_cell['cell_val']
-
-
-            #  don't explore neighbor cells that have already been explored
-            if global_map_cell['explored']:
-                continue
 
 
             #  distance from neighbor cell to origin cell
@@ -97,7 +97,14 @@ while iter<4:
             print(f'\tG: {g_score}')
             print(f'\tH: {h_score}')
             print(f'\tF: {f_score}')
-            print('\n')
+            
+
+            #  skip cell if it was previously explored and it already had a lower g_score
+            if global_map_cell['explored']:
+
+                g_prior = a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['g']
+                if g_prior<-g_score:
+                    continue
 
 
             #  record kernel_scores in dictionary
@@ -110,22 +117,30 @@ while iter<4:
 
     #  identify the next focus kernel
     kernel_scores = a_star_class.get_kernel_cells(kernel_coords)  # isolate only kernel cells on global map
+    pt1 = focus_cell
 
     next_cell_kernel = a_star_class.get_kernel_min(kernel=kernel_scores)  # identify kernel coord with the next focus cell (min score)
     focus_cell = kernel_scores[next_cell_kernel[0]][next_cell_kernel[-1]]['global_coord']  # relate selected kernel coord to the global map coord
+    pt2 = focus_cell
 
 
     #  demo - DELETE
-    path_[focus_cell[0]][focus_cell[-1]]=1
+    dir_char = a_star_class.get_dir_char(pt1, pt2)
+    path_[focus_cell[0]][focus_cell[-1]]=dir_char
 
 
     # increment iter
     iter+=1
 
 
+print('\n')
+print(a_star_class.history)
+
 
 #  check path - DELETE
-print(pd.DataFrame(path_))
+df = pd.DataFrame(path_)
+# df.to_excel('path.xlsx')
+print(df)
 
 
 isolated_data_key = a_star_class.get_isolated_key_view(dict_key='g')
