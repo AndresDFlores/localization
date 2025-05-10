@@ -3,7 +3,7 @@ from a_star import *
 
 
 # import obstacle map
-map = pd.read_excel(r'map.xlsx', sheet_name='Sheet9')
+map = pd.read_excel(r'map.xlsx', sheet_name='Sheet1')
 
 map_dims = map.shape
 path_ = [[0 for _ in range(map_dims[-1])] for _ in range(map_dims[0])]
@@ -20,8 +20,6 @@ flag_indices = a_star_class.get_flag_indices()
 #  init global score map (MAY DELETE)
 global_score_map = a_star_class.init_score_map()
 a_star_class.update_global_score_map(global_score_map)
-
-
 
 
 
@@ -47,7 +45,8 @@ while True:
 
     #  break out of algorithm if focus_cell is the destination
     if focus_cell_val == -255:
-        print(f'\nARRIVED AT {focus_cell} IN {iter} STEPS\n\n')
+        summary=f'\nARRIVED AT {focus_cell} IN {iter} STEPS\n\n'
+        print(summary)
         break
 
 
@@ -134,14 +133,15 @@ while True:
 
 
 print('\n')
-print(a_star_class.history)
 
 
 #  check path - DELETE
-df = pd.DataFrame(path_)
-# df.to_excel('path.xlsx')
-print(df)
+print(pd.DataFrame(path_))
 
 
 isolated_data_key = a_star_class.get_isolated_key_view(dict_key='g')
 print(pd.DataFrame(isolated_data_key))
+
+
+#  plot path
+a_star_class.plot_map_path(title=summary)

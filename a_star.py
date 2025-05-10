@@ -1,6 +1,10 @@
 import numpy as np
 from copy import deepcopy
 
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+
+
 class AStar:
 
 
@@ -14,6 +18,24 @@ class AStar:
 
         #  track all steps agent has taken
         self.history=[]
+
+
+
+    #  characterize binary map flags
+    def get_flag_indices(self):
+
+        flag_indices=dict()
+
+        #  iterate through each cell index
+        for row_idx, row in enumerate(self.binary_map):
+            for col_idx, col_val in enumerate(row):
+
+                #  check the current cell for a flag value
+                for flag in self.flags:
+                    if col_val==flag:
+                        flag_indices[flag]=(row_idx,col_idx)
+
+        return flag_indices
 
 
 
@@ -79,25 +101,7 @@ class AStar:
                 score_map[row_idx][col_idx]=cell_score
 
         return score_map
-
-
-
-    #  characterize binary map flags
-    def get_flag_indices(self):
-
-        flag_indices=dict()
-
-        #  iterate through each cell index
-        for row_idx, row in enumerate(self.binary_map):
-            for col_idx, col_val in enumerate(row):
-
-                #  check the current cell for a flag value
-                for flag in self.flags:
-                    if col_val==flag:
-                        flag_indices[flag]=(row_idx,col_idx)
-
-        return flag_indices
-    
+   
 
 
     @staticmethod
@@ -158,46 +162,61 @@ class AStar:
             kernel_scores.append(row_data)
 
         return kernel_scores
-
+    
 
 
     def get_kernel_min(self, kernel):
 
-        min_coord = [0, 0]
-        min_val = kernel[min_coord[0]][min_coord[-1]]['f']
-
+        #  remove invalid kernel cells
+        valid_cells = dict()
         for row_idx, row in enumerate(kernel):
             for col_idx, col in enumerate(row):
 
 
-                cell_coord = col['global_coord']
+                global_cell_coord = col['global_coord']
                 cell_val=col['cell_val']
 
 
                 #  skip steps into cells that were previously stepped into
-                if cell_coord in self.history:
+                if global_cell_coord in self.history:
+                    print(f'SKIPPED {global_cell_coord}:  CELL PREVIOUSLY TRAVELED')
                     continue
 
                 #  skip obstacle cells
                 if cell_val==1:
+                    print(f'SKIPPED {global_cell_coord}:  CELL NOT ACCESSIBLE')
                     continue
 
                 #  skip the focus_cell in kernel
                 if row_idx ==1 and col_idx==1:
+                    print(f'SKIPPED {global_cell_coord}:  AGENT CURRENTLY AT CELL')
                     continue
 
+                valid_cells[(row_idx, col_idx)]=(col)
+
+
+
+        #  identify min cell of valid kernel cells
+        min_coord = list(valid_cells)[0]  # using list instead of .values() to preserve key order in previous Python versions
+        min_val = valid_cells[min_coord]['f']
+
+
+        for kernel_cell_coord in list(valid_cells):
+
+                global_cell = valid_cells[kernel_cell_coord]
 
                 #  cell_score
-                score = col['f']
+                score = global_cell['f']
                 if score<min_val:
-                    min_coord=[row_idx, col_idx]
+                    min_coord=[*kernel_cell_coord]
                     min_val=score
 
         return min_coord
     
 
 
-# --- DEV TOOLS ---
+# --- DEV TOOLS TO DELETE---
+
 
     def get_isolated_key_view(self, dict_key):
 
@@ -208,6 +227,7 @@ class AStar:
 
         return isolated_data
     
+
 
     @staticmethod
     def view_score_matrix(kernel):
@@ -227,6 +247,7 @@ class AStar:
 
         return kernel_scores
     
+
 
     @staticmethod
     def get_dir_char(pt1:tuple, pt2:tuple):
@@ -283,3 +304,64 @@ class AStar:
 
 
         return dir_char
+    
+
+
+    def plot_map_path(self, title=''):
+
+        
+        #  only plot map with known obstacles
+        map = []
+        for row in self.binary_map:
+            row_data = [1 if col==1 else 0 for col in row ]
+            map.append(row_data)
+        
+
+        #  define binary map colors
+        cmap = ListedColormap(['grey', 'black'])
+
+
+        # display the binary map
+        plt.imshow(map, cmap)
+
+
+        #  plot origin and destination
+        plt.scatter(self.history[0][-1], self.history[0][0], s=100, c='g', label='ORIGIN')
+        plt.scatter(self.history[-1][-1], self.history[-1][0], s=100, marker='x', c='r', label='DESTINATION')
+
+
+        #  plot each step in defined path
+        for step in range(len(self.history)-1):
+
+            #  line bounds
+            start_step_row, start_step_col = self.history[step]
+            stop_step_row, stop_step_col = self.history[step+1]
+
+
+            #  path lines
+            x = [start_step_col, stop_step_col]
+            y = [start_step_row, stop_step_row]
+            plt.plot(x, y, linewidth=0.5, color='yellow')
+
+
+            #  directional arrows
+            u = np.diff(x)
+            v = np.diff(y)
+            pos_x = x[:-1] + u/2
+            pos_y = y[:-1] + v/2
+            norm = np.sqrt(u**2+v**2) 
+            plt.quiver(pos_x, pos_y, u/norm, v/norm, angles="xy", zorder=3, pivot="mid", color='yellow')
+
+
+        # remove axis ticks
+        plt.xticks([])
+        plt.yticks([])
+
+
+        #  other plot formatting
+        plt.title(title, y=0.9)
+        plt.legend(loc='lower right')
+
+
+        # Show the plot
+        plt.show()
