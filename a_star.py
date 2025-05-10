@@ -1,4 +1,5 @@
 import numpy as np
+import datetime as dt
 from copy import deepcopy
 
 import matplotlib.pyplot as plt
@@ -309,6 +310,9 @@ class AStar:
 
     def plot_map_path(self, title=''):
 
+        #  init fig
+        fig, ax = plt.subplots()
+
         
         #  only plot map with known obstacles
         map = []
@@ -322,12 +326,12 @@ class AStar:
 
 
         # display the binary map
-        plt.imshow(map, cmap)
+        ax.imshow(map, cmap)
 
 
         #  plot origin and destination
-        plt.scatter(self.history[0][-1], self.history[0][0], s=100, c='g', label='ORIGIN')
-        plt.scatter(self.history[-1][-1], self.history[-1][0], s=100, marker='x', c='r', label='DESTINATION')
+        ax.scatter(self.history[0][-1], self.history[0][0], s=100, c='g', label='ORIGIN')
+        ax.scatter(self.history[-1][-1], self.history[-1][0], s=100, marker='x', c='r', label='DESTINATION')
 
 
         #  plot each step in defined path
@@ -341,7 +345,7 @@ class AStar:
             #  path lines
             x = [start_step_col, stop_step_col]
             y = [start_step_row, stop_step_row]
-            plt.plot(x, y, linewidth=0.5, color='yellow')
+            ax.plot(x, y, linewidth=0.5, color='yellow')
 
 
             #  directional arrows
@@ -350,18 +354,20 @@ class AStar:
             pos_x = x[:-1] + u/2
             pos_y = y[:-1] + v/2
             norm = np.sqrt(u**2+v**2) 
-            plt.quiver(pos_x, pos_y, u/norm, v/norm, angles="xy", zorder=3, pivot="mid", color='yellow')
+            ax.quiver(pos_x, pos_y, u/norm, v/norm, angles="xy", zorder=3, pivot="mid", color='yellow')
 
 
-        # remove axis ticks
-        plt.xticks([])
-        plt.yticks([])
+        #  remove axis ticks
+        ax.set_xticks([])
+        ax.set_yticks([])
 
 
         #  other plot formatting
-        plt.title(title, y=0.9)
-        plt.legend(loc='lower right')
+        ax.set_title(title, y=0.9)
+        ax.legend(loc='lower right')
 
 
-        # Show the plot
-        plt.show()
+        #  save plot
+        date_time = dt.datetime.now()
+        date_time = date_time.strftime('%Y%m%d_%H%M%S')
+        fig.savefig(f'path_figs/{date_time}.png')
