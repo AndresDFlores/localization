@@ -1,18 +1,17 @@
 import pandas as pd
-import time
 from a_star import *
 
 
 # import obstacle map
 
-for sheet_num in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
+#  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+for sheet_num in [1]:
+
+    print(f'SHEET{sheet_num}')
     
-    time.sleep(1)
-
+    #  load map
     map = pd.read_excel(r'map.xlsx', sheet_name=f'Sheet{sheet_num}')
-
     map_dims = map.shape
-    path_ = [[0 for _ in range(map_dims[-1])] for _ in range(map_dims[0])]
 
 
 
@@ -20,13 +19,14 @@ for sheet_num in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
     binary_map = [map.iloc[idx].tolist() for idx in range(map.shape[0])]
     a_star_class = AStar(binary_map)
 
+
     # interpret global map and identify key locations
-    flag_indices = a_star_class.get_flag_indices()
+    flag_indices = a_star_class.get_flag_indices()  # 255: origin | -255: destination
+
 
     #  init global score map (MAY DELETE)
     global_score_map = a_star_class.init_score_map()
     a_star_class.update_global_score_map(global_score_map)
-
 
 
     #  initialize variables
@@ -39,17 +39,19 @@ for sheet_num in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
 
     #  ---  ALGORITHM  ---
     while True:
-    # while iter<8:
+    # while iter<2:
 
-        #  log step history
-        a_star_class.history.append(focus_cell)
+    
+        #  'close' the focus cell
+        a_star_class.closed_cells.append(focus_cell)
+        a_star_class.global_score_map[focus_cell[0]][focus_cell[-1]]['cell_open'] = False
 
         
         #  confirm that the focus cell is either open (0) or destination (-255)
         focus_cell_val = a_star_class.binary_map[focus_cell[0]][focus_cell[-1]]
         
 
-        #  break out of algorithm if focus_cell is the destination
+        #  break out of algorithm if focus_cell is the destination flag
         if focus_cell_val == -255:
             summary=f'\nARRIVED AT {focus_cell} IN {iter} STEPS\n\n'
             print(summary)
@@ -105,7 +107,7 @@ for sheet_num in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
                 
 
                 #  skip cell if it was previously explored and it already had a lower g_score
-                if global_map_cell['explored']:
+                if global_map_cell['cell_explored']:
 
                     g_prior = a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['g']
                     if g_prior<-g_score:
@@ -113,41 +115,31 @@ for sheet_num in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
 
 
                 #  record kernel_scores in dictionary
+                a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['cell_explored']=True
                 a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['g']=g_score
                 a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['h']=h_score
                 a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['f']=f_score
-                a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['explored']=True
-
-
+                a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['parent_global_coord']=focus_cell
+                
 
         #  identify the next focus kernel
-        kernel_scores = a_star_class.get_kernel_cells(kernel_coords)  # isolate only kernel cells on global map
-        pt1 = focus_cell
+        kernel_global_cells = a_star_class.get_kernel_cells(kernel_coords)  # isolate only kernel cells on global map
 
-        next_cell_kernel = a_star_class.get_kernel_min(kernel=kernel_scores)  # identify kernel coord with the next focus cell (min score)
-        focus_cell = kernel_scores[next_cell_kernel[0]][next_cell_kernel[-1]]['global_coord']  # relate selected kernel coord to the global map coord
-        pt2 = focus_cell
-
-
-        #  demo - DELETE
-        dir_char = a_star_class.get_dir_char(pt1, pt2)
-        path_[focus_cell[0]][focus_cell[-1]]=dir_char
+        kernel_min_score_cell = a_star_class.get_kernel_min(kernel=kernel_global_cells)  # identify kernel cell with the min F score
+        focus_cell = kernel_global_cells[kernel_min_score_cell[0]][kernel_min_score_cell[-1]]['cell_global_coord']  # relate kernel min F cell coord to the global coord
 
 
         # increment iter
         iter+=1
 
 
+    #  dev visualizations
     print('\n')
 
 
-    #  check path - DELETE
-    print(pd.DataFrame(path_))
+    # isolated_data_key = a_star_class.get_isolated_key_view(dict_key='cell_open')
+    # print(pd.DataFrame(isolated_data_key))
 
 
-    isolated_data_key = a_star_class.get_isolated_key_view(dict_key='g')
-    print(pd.DataFrame(isolated_data_key))
-
-
-    #  plot path
-    a_star_class.plot_map_path(title=summary)
+    # #  plot path
+    # a_star_class.plot_map_path(title=summary)

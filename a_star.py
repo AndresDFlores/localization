@@ -18,7 +18,26 @@ class AStar:
         self.flags = [255, -255]
 
         #  track all steps agent has taken
-        self.history=[]
+        self.closed_cells=[]
+
+
+
+    #  this method updates the global_score_map class variable, which characterizes each map cell
+    @classmethod
+    def update_global_score_map(cls, global_score_map):
+        cls.global_score_map=global_score_map
+
+
+
+    #  get a list of closed cells (cells that agent has already stepped through)
+    def get_closed_cells(self):
+
+        for row in self.global_score_map:
+            for cell in row:
+
+                if cell['cell_open'] is False:
+                    closed_cell_coord = cell['cell_global_coord']
+                    self.closed_cells.append(closed_cell_coord)
 
 
 
@@ -37,13 +56,6 @@ class AStar:
                         flag_indices[flag]=(row_idx,col_idx)
 
         return flag_indices
-
-
-
-    #  this method updates the instance updates the global_score_map class variable, which characterizes each map cell
-    @classmethod
-    def update_global_score_map(cls, global_score_map):
-        cls.global_score_map=global_score_map
 
 
 
@@ -91,12 +103,14 @@ class AStar:
 
 
                 cell_score = dict(
-                    explored=False,
-                    global_coord = (row_idx, col_idx),
+                    cell_global_coord = (row_idx, col_idx),
+                    cell_open=True,
+                    cell_explored=False,
                     cell_val=val,
                     g = 0, 
                     h = 0,
-                    f = 0
+                    f = 0,
+                    parent_global_coord=None,
                     )
                             
                 score_map[row_idx][col_idx]=cell_score
@@ -174,12 +188,12 @@ class AStar:
             for col_idx, col in enumerate(row):
 
 
-                global_cell_coord = col['global_coord']
+                global_cell_coord = col['cell_global_coord']
                 cell_val=col['cell_val']
 
 
                 #  skip steps into cells that were previously stepped into
-                if global_cell_coord in self.history:
+                if global_cell_coord in self.closed_cells:
                     print(f'SKIPPED {global_cell_coord}:  CELL PREVIOUSLY TRAVELED')
                     continue
 
@@ -330,16 +344,16 @@ class AStar:
 
 
         #  plot origin and destination
-        ax.scatter(self.history[0][-1], self.history[0][0], s=100, c='g', label='ORIGIN')
-        ax.scatter(self.history[-1][-1], self.history[-1][0], s=100, marker='x', c='r', label='DESTINATION')
+        ax.scatter(self.closed_cells[0][-1], self.closed_cells[0][0], s=100, c='g', label='ORIGIN')
+        ax.scatter(self.closed_cells[-1][-1], self.closed_cells[-1][0], s=100, marker='x', c='r', label='DESTINATION')
 
 
         #  plot each step in defined path
-        for step in range(len(self.history)-1):
+        for step in range(len(self.closed_cells)-1):
 
             #  line bounds
-            start_step_row, start_step_col = self.history[step]
-            stop_step_row, stop_step_col = self.history[step+1]
+            start_step_row, start_step_col = self.closed_cells[step]
+            stop_step_row, stop_step_col = self.closed_cells[step+1]
 
 
             #  path lines
@@ -369,5 +383,5 @@ class AStar:
 
         #  save plot
         date_time = dt.datetime.now()
-        date_time = date_time.strftime('%Y%m%d_%H%M%S')
+        date_time = date_time.strftime('%Y%m%d_%H%M%S.%f')[:-3]
         fig.savefig(f'path_figs/{date_time}.png')
