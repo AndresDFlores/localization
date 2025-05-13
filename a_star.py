@@ -104,9 +104,9 @@ class AStar:
 
                 cell_score = dict(
                     cell_global_coord = (global_row_idx, global_col_idx),
+                    cell_val=val,
                     cell_open=True,
                     cell_explored=False,
-                    cell_val=val,
                     kernel_parent_global_coord=None,
                     kernel_neighbors=None,
                     g = 0, 
