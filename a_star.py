@@ -97,23 +97,24 @@ class AStar:
 
         score_map=deepcopy(self.binary_map)
 
-        #  iterate through each cell index
-        for row_idx, row in enumerate(self.binary_map):
-            for col_idx, val in enumerate(row):
+        #  iterate through each global cell index
+        for global_row_idx, row in enumerate(self.binary_map):
+            for global_col_idx, val in enumerate(row):
 
 
                 cell_score = dict(
-                    cell_global_coord = (row_idx, col_idx),
+                    cell_global_coord = (global_row_idx, global_col_idx),
                     cell_open=True,
                     cell_explored=False,
                     cell_val=val,
+                    kernel_parent_global_coord=None,
+                    kernel_neighbors=None,
                     g = 0, 
                     h = 0,
-                    f = 0,
-                    parent_global_coord=None,
+                    f = 0
                     )
                             
-                score_map[row_idx][col_idx]=cell_score
+                score_map[global_row_idx][global_col_idx]=cell_score
 
         return score_map
    
@@ -194,17 +195,17 @@ class AStar:
 
                 #  skip steps into cells that were previously stepped into
                 if global_cell_coord in self.closed_cells:
-                    print(f'SKIPPED {global_cell_coord}:  CELL PREVIOUSLY TRAVELED')
+                    print(f'\nSKIPPED {global_cell_coord}:  CELL PREVIOUSLY TRAVELED')
                     continue
 
                 #  skip obstacle cells
                 if cell_val==1:
-                    print(f'SKIPPED {global_cell_coord}:  CELL NOT ACCESSIBLE')
+                    print(f'\nSKIPPED {global_cell_coord}:  CELL NOT ACCESSIBLE')
                     continue
 
                 #  skip the focus_cell in kernel
                 if row_idx ==1 and col_idx==1:
-                    print(f'SKIPPED {global_cell_coord}:  AGENT CURRENTLY AT CELL')
+                    print(f'\nSKIPPED {global_cell_coord}:  AGENT CURRENTLY AT CELL')
                     continue
 
                 valid_cells[(row_idx, col_idx)]=(col)

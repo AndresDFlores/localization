@@ -5,7 +5,7 @@ from a_star import *
 # import obstacle map
 
 #  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
-for sheet_num in [1]:
+for sheet_num in [9]:
 
     print(f'SHEET{sheet_num}')
     
@@ -41,6 +41,9 @@ for sheet_num in [1]:
     while True:
     # while iter<2:
 
+
+        print('\n')
+
     
         #  'close' the focus cell
         a_star_class.closed_cells.append(focus_cell)
@@ -67,7 +70,7 @@ for sheet_num in [1]:
         kernel_coords = a_star_class.get_kernel_coords(cell=focus_cell)
 
 
-        #  iterate through kernel
+        #  --- iterate through kernel
         for kernel_row_idx, kernel_row in enumerate(kernel_coords):
             for kernel_col_idx, _ in enumerate(kernel_row):
 
@@ -116,30 +119,56 @@ for sheet_num in [1]:
 
                 #  record kernel_scores in dictionary
                 a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['cell_explored']=True
+                a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['kernel_parent_global_coord']=focus_cell
                 a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['g']=g_score
                 a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['h']=h_score
                 a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['f']=f_score
-                a_star_class.global_score_map[global_map_coord[0]][global_map_coord[-1]]['parent_global_coord']=focus_cell
                 
 
-        #  identify the next focus kernel
-        kernel_global_cells = a_star_class.get_kernel_cells(kernel_coords)  # isolate only kernel cells on global map
+        #  --- identify the next focus kernel
 
-        kernel_min_score_cell = a_star_class.get_kernel_min(kernel=kernel_global_cells)  # identify kernel cell with the min F score
-        focus_cell = kernel_global_cells[kernel_min_score_cell[0]][kernel_min_score_cell[-1]]['cell_global_coord']  # relate kernel min F cell coord to the global coord
+        # isolate only kernel cells on global map
+        kernel_global_cells = a_star_class.get_kernel_cells(kernel_coords)
 
+        # save the kernel of explored cells built around the focus cell
+        a_star_class.global_score_map[focus_cell[0]][focus_cell[-1]]['kernel_neighbors'] = kernel_global_cells
+
+        # identify kernel cell with the min F score
+        kernel_min_score_cell = a_star_class.get_kernel_min(kernel=kernel_global_cells)
+
+        # relate kernel min F cell coord to the global coord
+        focus_cell = kernel_global_cells[kernel_min_score_cell[0]][kernel_min_score_cell[-1]]['cell_global_coord']
 
         # increment iter
         iter+=1
 
 
-    #  dev visualizations
+    #  ---  dev visualizations
     print('\n')
 
 
-    # isolated_data_key = a_star_class.get_isolated_key_view(dict_key='cell_open')
+    #  --- get miniumum score from open and explored cells
+    isolated_data = []
+    for row in a_star_class.global_score_map:
+
+        row_data=[]
+        for col in row:
+            if col['cell_open']==True and col['cell_explored']==True:
+                row_data.append(col['f'])
+            else:
+                row_data.append(None)
+
+        isolated_data.append(row_data)
+
+    print(pd.DataFrame(isolated_data))
+
+
+
+    # #  ---  display a dict key in matrix
+    # isolated_data_key = a_star_class.get_isolated_key_view(dict_key='f')
     # print(pd.DataFrame(isolated_data_key))
 
 
-    # #  plot path
+
+    # #  --- plot path
     # a_star_class.plot_map_path(title=summary)
