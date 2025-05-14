@@ -1,5 +1,6 @@
 import numpy as np
 import datetime as dt
+
 from copy import deepcopy
 
 import matplotlib.pyplot as plt
@@ -17,8 +18,11 @@ class AStar:
         #  define start and end points
         self.flags = [255, -255]
 
-        #  track all steps agent has taken
-        self.closed_cells=[]
+        #  track all open and explored cells
+        self.open_cells=[]
+
+        #  track all open and explored cells
+        self.final_path=[]
 
 
 
@@ -29,15 +33,37 @@ class AStar:
 
 
 
-    #  get a list of closed cells (cells that agent has already stepped through)
-    def get_closed_cells(self):
+    #  update and sort the list of open cells that have been explored
+    def update_open_list(self):
 
+        open_cells_list = []
         for row in self.global_score_map:
             for cell in row:
 
+                if cell is None:
+                    continue
+
+                global_cell_coord = cell['cell_global_coord']
+
+                if cell['cell_open']==False:
+                    print(f'\nSKIPPED {global_cell_coord}:  CELL CLOSED')
+                    continue
+                if cell['cell_explored']==False:
+                    print(f'\nSKIPPED {global_cell_coord}:  CELL NOT EXPLORED')
+                    continue
+                if cell['cell_val']==1:
+                    print(f'\nSKIPPED {global_cell_coord}:  CELL NOT ACCESSIBLE')
+                    continue
+
+
                 if cell['cell_open'] is False:
-                    closed_cell_coord = cell['cell_global_coord']
-                    self.closed_cells.append(closed_cell_coord)
+                    print(f'\nSKIPPED {global_cell_coord}:  CELL PREVIOUSLY TRAVELED')
+                    continue
+                    
+                open_cells_list.append(cell)
+                    
+        #  sort open_cells_list along 'f', then along 'h'
+        self.open_cells = sorted(open_cells_list, key=lambda x: (x['f'], x['h']))
 
 
 
@@ -55,7 +81,7 @@ class AStar:
                     if col_val==flag:
                         flag_indices[flag]=(row_idx,col_idx)
 
-        return flag_indices
+        self.flag_indices = flag_indices
 
 
 
@@ -180,55 +206,29 @@ class AStar:
         return kernel_scores
     
 
+    def get_open_cells_min(self):
 
-    def get_kernel_min(self, kernel):
+        min_cell = self.open_cells.pop(0)
 
-        #  remove invalid kernel cells
-        valid_cells = dict()
-        for row_idx, row in enumerate(kernel):
-            for col_idx, col in enumerate(row):
+        return min_cell
 
 
-                global_cell_coord = col['cell_global_coord']
-                cell_val=col['cell_val']
+    #  get final path
+    def get_final_path(self):
 
+        focus_cell = self.flag_indices[-255]
+        self.final_path.append(focus_cell)
+        
+        cell_val = self.global_score_map[focus_cell[0]][focus_cell[-1]]['cell_val']
+        while cell_val != 255:
 
-                #  skip steps into cells that were previously stepped into
-                if global_cell_coord in self.closed_cells:
-                    print(f'\nSKIPPED {global_cell_coord}:  CELL PREVIOUSLY TRAVELED')
-                    continue
+            focus_cell = self.global_score_map[focus_cell[0]][focus_cell[-1]]['kernel_parent_global_coord']
+            cell_val = self.global_score_map[focus_cell[0]][focus_cell[-1]]['cell_val']
 
-                #  skip obstacle cells
-                if cell_val==1:
-                    print(f'\nSKIPPED {global_cell_coord}:  CELL NOT ACCESSIBLE')
-                    continue
+            self.final_path.append(focus_cell)
 
-                #  skip the focus_cell in kernel
-                if row_idx ==1 and col_idx==1:
-                    print(f'\nSKIPPED {global_cell_coord}:  AGENT CURRENTLY AT CELL')
-                    continue
+        self.final_path.reverse()
 
-                valid_cells[(row_idx, col_idx)]=(col)
-
-
-
-        #  identify min cell of valid kernel cells
-        min_coord = list(valid_cells)[0]  # using list instead of .values() to preserve key order in previous Python versions
-        min_val = valid_cells[min_coord]['f']
-
-
-        for kernel_cell_coord in list(valid_cells):
-
-                global_cell = valid_cells[kernel_cell_coord]
-
-                #  cell_score
-                score = global_cell['f']
-                if score<min_val:
-                    min_coord=[*kernel_cell_coord]
-                    min_val=score
-
-        return min_coord
-    
 
 
 # --- DEV TOOLS TO DELETE---
@@ -242,27 +242,7 @@ class AStar:
             isolated_data.append(row_data)
 
         return isolated_data
-    
-
-
-    @staticmethod
-    def view_score_matrix(kernel):
-
-        kernel_scores = []
-
-        for row_idx, row in enumerate(kernel):
-            row_scores=[]
-
-            for col_idx, col in enumerate(row):
-
-                score = col['f']
-                row_scores.append(score)
-
-
-            kernel_scores.append(row_scores)
-
-        return kernel_scores
-    
+      
 
 
     @staticmethod
@@ -345,16 +325,16 @@ class AStar:
 
 
         #  plot origin and destination
-        ax.scatter(self.closed_cells[0][-1], self.closed_cells[0][0], s=100, c='g', label='ORIGIN')
-        ax.scatter(self.closed_cells[-1][-1], self.closed_cells[-1][0], s=100, marker='x', c='r', label='DESTINATION')
+        ax.scatter(self.flag_indices[255][-1], self.flag_indices[255][0], s=100, c='g', label='ORIGIN')
+        ax.scatter(self.flag_indices[-255][-1], self.flag_indices[-255][0], s=100, marker='x', c='r', label='DESTINATION')
 
 
         #  plot each step in defined path
-        for step in range(len(self.closed_cells)-1):
+        for step in range(len(self.final_path)-1):
 
             #  line bounds
-            start_step_row, start_step_col = self.closed_cells[step]
-            stop_step_row, stop_step_col = self.closed_cells[step+1]
+            start_step_row, start_step_col = self.final_path[step]
+            stop_step_row, stop_step_col = self.final_path[step+1]
 
 
             #  path lines
