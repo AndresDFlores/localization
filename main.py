@@ -4,8 +4,8 @@ from a_star import *
 
 # import obstacle map
 
-#  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
-for sheet_num in [12]:
+#  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+for sheet_num in [0]:
 
     print(f'SHEET{sheet_num}')
     
@@ -161,5 +161,22 @@ for sheet_num in [12]:
 
 
     #  --- DEV plot path
+
+    df = a_star_class.get_isolated_key_view(dict_key='h')
+    df = pd.DataFrame(df)
+    df.to_excel('h.xlsx')
+
+    df = a_star_class.get_isolated_key_view(dict_key='g')
+    df = pd.DataFrame(df)
+    df.to_excel('g.xlsx')
+
+    df = a_star_class.get_isolated_key_view(dict_key='f')
+    df = pd.DataFrame(df)
+    df.to_excel('f.xlsx')
+
+    df = a_star_class.get_isolated_key_view(dict_key='cell_global_coord')
+    df = pd.DataFrame(df)
+    df.to_excel('coords.xlsx')
+
     summary=f'\nARRIVED AT {a_star_class.final_path[-1]} IN {len(a_star_class.final_path)-1} STEPS\n\n'
     a_star_class.plot_map_path(title=summary)
