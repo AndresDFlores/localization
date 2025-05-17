@@ -8,6 +8,11 @@ from matplotlib.colors import ListedColormap
 
 
 class AStar:
+    
+    @classmethod
+    def set_literal(cls, literal=False):
+        cls.literal=literal
+
 
 
     def __init__(self, binary_map):
@@ -19,10 +24,13 @@ class AStar:
         self.flags = [255, -255]
 
         #  track all open and explored cells
-        self.open_cells=[]
+        self.open_nodes=[]
 
         #  track all open and explored cells
         self.final_path=[]
+
+        #  init literal status
+        self.set_literal(literal=False)
 
 
 
@@ -36,34 +44,34 @@ class AStar:
     #  update and sort the list of open cells that have been explored
     def update_open_list(self):
 
-        open_cells_list = []
+        open_nodes_list = []
         for row in self.global_score_map:
             for cell in row:
 
                 if cell is None:
                     continue
 
-                global_cell_coord = cell['cell_global_coord']
+                global_node_coord = cell['cell_global_coord']
 
                 if cell['cell_open']==False:
-                    print(f'\nSKIPPED {global_cell_coord}:  CELL CLOSED')
+                    if self.literal: print(f'\nSKIPPED {global_node_coord}:  CELL CLOSED')
                     continue
                 if cell['cell_explored']==False:
-                    print(f'\nSKIPPED {global_cell_coord}:  CELL NOT EXPLORED')
+                    if self.literal: print(f'\nSKIPPED {global_node_coord}:  CELL NOT EXPLORED')
                     continue
                 if cell['cell_val']==1:
-                    print(f'\nSKIPPED {global_cell_coord}:  CELL NOT ACCESSIBLE')
+                    if self.literal: print(f'\nSKIPPED {global_node_coord}:  CELL NOT ACCESSIBLE')
                     continue
 
 
                 if cell['cell_open'] is False:
-                    print(f'\nSKIPPED {global_cell_coord}:  CELL PREVIOUSLY TRAVELED')
+                    if self.literal: print(f'\nSKIPPED {global_node_coord}:  CELL PREVIOUSLY TRAVELED')
                     continue
                     
-                open_cells_list.append(cell)
+                open_nodes_list.append(cell)
                     
-        #  sort open_cells_list along 'f', then along 'h'
-        self.open_cells = sorted(open_cells_list, key=lambda x: (x['f'], x['h']))
+        #  sort open_nodes_list along 'f', then along 'h'
+        self.open_nodes = sorted(open_nodes_list, key=lambda x: (x['f'], x['h']))
 
 
 
@@ -156,18 +164,18 @@ class AStar:
 
 
     #  distance to origin cell
-    def get_g_score(self, current_pos:tuple, focus_cell_pos:tuple):
+    def get_g_score(self, current_pos:tuple, focus_node_pos:tuple):
 
-        focus_cell_g_score = self.global_score_map[focus_cell_pos[0]][focus_cell_pos[-1]]['g']
+        focus_node_g_score = self.global_score_map[focus_node_pos[0]][focus_node_pos[-1]]['g']
 
         point_1 = current_pos
-        point_2 = focus_cell_pos
+        point_2 = focus_node_pos
 
         #  calculate the equclidean distance between the current position index coords and the origin index coords
         euclid_distance = self.get_euclidean_distance(point_1, point_2)
 
         #  calculate the g_score
-        g_score = int(euclid_distance*10)+focus_cell_g_score
+        g_score = int(euclid_distance*10)+focus_node_g_score
         
         return g_score
 
@@ -191,7 +199,7 @@ class AStar:
     
 
     #  isolate only kernel cells on global map
-    def get_kernel_cells(self, kernel_coords):
+    def get_kernel_nodes(self, kernel_coords):
 
         kernel_scores = []
         for row in kernel_coords:
@@ -206,26 +214,26 @@ class AStar:
         return kernel_scores
     
 
-    def get_open_cells_min(self):
+    def get_open_nodes_min(self):
 
-        min_cell = self.open_cells.pop(0)
+        min_node = self.open_nodes.pop(0)
 
-        return min_cell
+        return min_node
 
 
     #  get final path
     def get_final_path(self):
 
-        focus_cell = self.flag_indices[-255]
-        self.final_path.append(focus_cell)
+        focus_node = self.flag_indices[-255]
+        self.final_path.append(focus_node)
         
-        cell_val = self.global_score_map[focus_cell[0]][focus_cell[-1]]['cell_val']
+        cell_val = self.global_score_map[focus_node[0]][focus_node[-1]]['cell_val']
         while cell_val != 255:
 
-            focus_cell = self.global_score_map[focus_cell[0]][focus_cell[-1]]['kernel_parent_global_coord']
-            cell_val = self.global_score_map[focus_cell[0]][focus_cell[-1]]['cell_val']
+            focus_node = self.global_score_map[focus_node[0]][focus_node[-1]]['kernel_parent_global_coord']
+            cell_val = self.global_score_map[focus_node[0]][focus_node[-1]]['cell_val']
 
-            self.final_path.append(focus_cell)
+            self.final_path.append(focus_node)
 
         self.final_path.reverse()
 
@@ -242,65 +250,7 @@ class AStar:
             isolated_data.append(row_data)
 
         return isolated_data
-      
-
-
-    @staticmethod
-    def get_dir_char(pt1:tuple, pt2:tuple):
-
-        y1,x1=pt1
-        y2,x2=pt2
-
-        # right
-        if x1<x2:
-
-            # down
-            if y1<y2:
-                dir_char='\\'
-
-            # up
-            elif y1>y2:
-                dir_char='/'
-
-            # no vertical movement
-            elif y1==y2:
-                dir_char='\u2192'
-
-
-        # left
-        elif x1>x2:
-
-            # down
-            if y1<y2:
-                dir_char='/'
-
-            # up
-            elif y1>y2:
-                dir_char='\\'
-
-            # no vertical movement
-            elif y1==y2:
-                dir_char='\u2190'
-
-
-        #  no horizontal movement
-        elif x1==x2:
-
-            # down
-            if y1<y2:
-                dir_char='\u2193'
-
-            # up
-            elif y1>y2:
-                dir_char='\u2191'
-
-            # no vertical movement
-            elif y1==y2:
-                dir_char='o'
-
-
-        return dir_char
-    
+         
 
 
     def plot_map_path(self, title=''):
