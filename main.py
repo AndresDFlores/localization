@@ -4,13 +4,14 @@ from a_star import *
 
 # import obstacle map
 
-#  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
-for sheet_num in [0]:
+#  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+for sheet_num in [12]:
 
     print(f'SHEET{sheet_num}')
     
     #  load map
-    map = pd.read_excel(r'maps.xlsx', sheet_name=f'Sheet{sheet_num}')
+    # map = pd.read_excel(r'maps.xlsx', sheet_name=f'Sheet{sheet_num}')
+    map = pd.read_excel(r'maps.xlsx', sheet_name='Sheet01')
     map_dims = map.shape
 
 
@@ -163,20 +164,22 @@ for sheet_num in [0]:
     #  --- DEV plot path
 
     df = a_star_class.get_isolated_key_view(dict_key='h')
-    df = pd.DataFrame(df)
-    df.to_excel('h.xlsx')
+    df1 = pd.DataFrame(df)
 
     df = a_star_class.get_isolated_key_view(dict_key='g')
-    df = pd.DataFrame(df)
-    df.to_excel('g.xlsx')
+    df2 = pd.DataFrame(df)
 
     df = a_star_class.get_isolated_key_view(dict_key='f')
-    df = pd.DataFrame(df)
-    df.to_excel('f.xlsx')
+    df3 = pd.DataFrame(df)
 
     df = a_star_class.get_isolated_key_view(dict_key='cell_global_coord')
-    df = pd.DataFrame(df)
-    df.to_excel('coords.xlsx')
+    df4 = pd.DataFrame(df)
+
+    with pd.ExcelWriter('score_map.xlsx') as writer:  
+        df1.to_excel(writer, sheet_name='h')
+        df2.to_excel(writer, sheet_name='g')
+        df3.to_excel(writer, sheet_name='f')
+        df4.to_excel(writer, sheet_name='coords')
 
     summary=f'\nARRIVED AT {a_star_class.final_path[-1]} IN {len(a_star_class.final_path)-1} STEPS\n\n'
     a_star_class.plot_map_path(title=summary)
