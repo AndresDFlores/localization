@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class CircleIntersections():
+class CircleIntersections:
 
     def __init__(self):
         pass
