@@ -83,7 +83,7 @@ class CircleIntersections():
 
 
 
-        #  rotate back if circ_1 is rotated to avoid division by zero in 'm' calc
+        #  rotate back if circ_1 and circ_2 rotated to avoid division by zero in 'm' calc
         if rotation:
             x1, y1 = self.rotate_point_2d(point=(x1,y1), angle=-45)
             x2, y2 = self.rotate_point_2d(point=(x2,y2), angle=-45)
