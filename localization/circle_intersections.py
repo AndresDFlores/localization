@@ -1,27 +1,95 @@
 import numpy as np
 
 
+class CircleIntersections():
 
-def get_intersections(circ_1:tuple, circ_2:tuple):
-    #  input tuple: (radius, center_x, center_y)
+    def __init__(self):
+        pass
 
-    r1, a1, b1 = circ_1
-    r2, a2, b2 = circ_2
 
-    m = (a2-a1)/(b1-b2)
-    c = ((a1**2)+(b1**2)+(r2**2)-((a2**2)+(b2**2)+(r1**2)))/(2*(b1-b2))
+    @staticmethod
+    def rotate_point_2d(point:tuple, angle):
+        #  point is a tuple with two numeric values, (x, y)
+        #  angle is a numeric value in degrees over which the point is rotating
 
-    A = 1+(m**2)
-    B = 2*((m*(c-b1))-a1)
-    C = (a1**2)+((c-b1)**2)-(r1**2)
 
-    x1 = ((-1*B)+np.sqrt(B**2-(4*A*C)))/(2*A)
-    y1 = m*x1+c
+        #  create coordinate matrix
+        coord = np.array(
+            [
+                [point[0]],
+                [point[-1]]
+            ]
+        )
 
-    x2 = (-B-np.sqrt(B**2-(4*A*C)))/(2*A)
-    y2 = m*x2+c
 
-    return (x1, y1), (x2, y2)
+        #  convert degrees to radians
+        theta_rad = np.deg2rad(angle)
+
+
+        #  rotation matrix
+        rotation_matrix = np.array(
+            [
+                [np.cos(theta_rad), -1*np.sin(theta_rad)],
+                [np.sin(theta_rad), np.cos(theta_rad)]
+            ]
+        )
+
+
+        #  calculated rotated point
+        rotated = rotation_matrix@coord
+
+
+        #  format as tuple for output
+        return (*rotated[0], *rotated[-1])
+
+
+
+    def get_intersections(self, circ_1:tuple, circ_2:tuple):
+        #  input tuple: (radius, center_x, center_y)
+
+
+        #  assign inputs to variables
+        r1, a1, b1 = circ_1
+        r2, a2, b2 = circ_2
+
+
+        #  check for division by zero
+        if b1==b2: rotation=True
+        else: rotation=False
+
+
+        #  rotate circ_1 and circ_2 if rotation required to avoid division by zero in 'm' calc
+        if rotation:
+            rotated_circ_1 = self.rotate_point_2d(point=(a1,b1), angle=45)
+            rotated_circ_2 = self.rotate_point_2d(point=(a2,b2), angle=45)
+
+            r1, a1, b1 = (r1, rotated_circ_1[0], rotated_circ_1[-1])
+            r2, a2, b2 = (r2, rotated_circ_2[0], rotated_circ_2[-1])
+
+
+
+        m = (a2-a1)/(b1-b2)
+        c = ((a1**2)+(b1**2)+(r2**2)-((a2**2)+(b2**2)+(r1**2)))/(2*(b1-b2))
+
+        A = 1+(m**2)
+        B = 2*((m*(c-b1))-a1)
+        C = (a1**2)+((c-b1)**2)-(r1**2)
+
+        x1 = ((-1*B)+np.sqrt(B**2-(4*A*C)))/(2*A)
+        y1 = m*x1+c
+
+        x2 = (-B-np.sqrt(B**2-(4*A*C)))/(2*A)
+        y2 = m*x2+c
+
+
+
+        #  rotate back if circ_1 is rotated to avoid division by zero in 'm' calc
+        if rotation:
+            x1, y1 = self.rotate_point_2d(point=(x1,y1), angle=-45)
+            x2, y2 = self.rotate_point_2d(point=(x2,y2), angle=-45)
+            
+
+        return (x1, y1), (x2, y2)
 
 
 
@@ -31,8 +99,14 @@ if __name__=="__main__":
 
 
     #  circle definitions
-    r1, a1, b1 = (3.16, 7, 1)
-    r2, a2, b2 = (9.43, 13, 12)
+    r1, a1, b1 = (9.43, 13, 12)
+    r2, a2, b2 = (10.63, 1, 12)
+
+    # r1, a1, b1 = (3.16, 7, 1)
+    # r2, a2, b2 = (10.63, 1, 12)
+
+    # r1, a1, b1 = (3.16, 7, 1)
+    # r2, a2, b2 = (9.43, 13, 12)
 
 
     #  define domain in degrees
@@ -49,7 +123,8 @@ if __name__=="__main__":
     circ2_y = r2*np.sin(theta)+b2
 
 
-    intersection_1, intersection_2 = get_intersections(
+    circ_ints_class = CircleIntersections()
+    intersection_1, intersection_2 = circ_ints_class.get_intersections(
         circ_1=(r1,a1,b1), 
         circ_2=(r2,a2,b2)
     )
