@@ -7,12 +7,20 @@ import matplotlib.pyplot as plt
 from circle_intersections import *
 
 
-class Localization:
+class TrilaterationLocalization:
+
+
+    @classmethod
+    def set_circle_count(cls, circle_count):
+        cls.circle_count=circle_count
 
 
     def __init__(self):
 
+        #  initialize vars
+        self.set_circle_count(circle_count=2)
         self.circle_intersections_class = CircleIntersections()
+
 
         #  initialize plots
         self.fig, self.ax = plt.subplots()
@@ -52,15 +60,14 @@ class Localization:
 
     def get_anchor_intersections(self, circles:list):
 
-        circle_count = len(circles)
-
+        #  get intersection of all defined circles
         all_intersections = []
-        for circle_idx in range(circle_count-1):
-            circ_1 = circles[circle_idx]
-            circ_2 = circles[circle_idx+1]
+        for focus_idx, focus_anchor in enumerate(circles):
+            for neighbor_idx, neighbor_anchor in enumerate(circles):
 
-            intersection_points = self.circle_intersections_class.get_intersections(circ_1, circ_2)
-            all_intersections.extend(intersection_points)
+                if focus_idx!=neighbor_idx:
+                    intersection_points = self.circle_intersections_class.get_intersections(focus_anchor, neighbor_anchor)
+                    all_intersections.extend(intersection_points)
 
         return all_intersections
 
@@ -82,7 +89,8 @@ class Localization:
     def cluster(self, X):
 
         X = [[*x] for x in X]
-        dbscan = DBSCAN(eps=1, min_samples=2)  # min_samples = anchor_count-1
+        cluster_min = 2*self.circle_count  # confirm that this calculation properly defines/constrains the cluster
+        dbscan = DBSCAN(eps=1, min_samples=cluster_min)
 
         clusters = dbscan.fit(X)
         labels = clusters.labels_
@@ -110,6 +118,9 @@ class Localization:
 
 
     def main(self, circles, title):
+
+        #  indicate how many circles have been defined by input
+        self.set_circle_count(circle_count=len(circles))
 
         self.plot_circles(circles)
         self.localize(circles)

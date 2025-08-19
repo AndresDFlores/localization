@@ -54,7 +54,7 @@ class CircleIntersections:
 
 
         #  check for division by zero
-        if b1==b2: rotation=True
+        if a1==a2 or b1==b2: rotation=True
         else: rotation=False
 
 
@@ -99,14 +99,20 @@ if __name__=="__main__":
 
 
     #  circle definitions
-    r1, a1, b1 = (9.43, 13, 12)
-    r2, a2, b2 = (10.63, 1, 12)
+    # r1, a1, b1 = (9.43, 13, 12)
+    # r2, a2, b2 = (10.63, 1, 12)
 
     # r1, a1, b1 = (3.16, 7, 1)
     # r2, a2, b2 = (10.63, 1, 12)
 
     # r1, a1, b1 = (3.16, 7, 1)
     # r2, a2, b2 = (9.43, 13, 12)
+
+
+    #  NO INTERSECTION IN CIRCLE DEFINITION | handle exception and put into test cases
+    r1, a1, b1 = (11, 1, 12)
+    r2, a2, b2 = (1, 13, 12)
+
 
 
     #  define domain in degrees

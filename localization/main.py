@@ -1,7 +1,7 @@
 from sandbox import *
 import pandas as pd
 
-from localization import *
+from trilateration_localization import *
 
 
 df = pd.read_excel('coords.xlsx')
@@ -9,7 +9,7 @@ df = pd.read_excel('coords.xlsx')
 
 for row_idx, row in df.iterrows():
 
-    localization_class = Localization()
+    trilat_localization_class = TrilaterationLocalization()
 
     (r1, a1, b1) = (
         df['dist1'][row_idx],
@@ -36,5 +36,5 @@ for row_idx, row in df.iterrows():
     ]
 
 
-    localization_class.main(anchor_defs, title=row_idx)
+    trilat_localization_class.main(anchor_defs, title=row_idx)
     
