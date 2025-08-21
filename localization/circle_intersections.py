@@ -60,7 +60,7 @@ if __name__=="__main__":
 
 
     #  three-circle intersection linear algebra
-    intersection = circ_ints_class.get_intersections_linalg(
+    intersection = circ_ints_class.get_intersections(
         circ_1=(r1,a1,b1), 
         circ_2=(r2,a2,b2),
         circ_3=(r3,a3,b3),
