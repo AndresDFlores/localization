@@ -33,8 +33,19 @@ class TrilaterationLocalization:
 
 
     def plot_circles(self, circles:list):
+        #  'circles' input should be a list of tuples
+        #  each tuple should define a circle: (radius, center_x, center_y)
 
-        for circle in circles:
+
+        #  define circle colors for clearer plotting
+        colors={
+            0: 'green',
+            1: 'dodgerblue',
+            2: 'orange'
+        }
+
+
+        for idx, circle in enumerate(circles):
 
             radius = circle[0]
             center_x = circle[1]
@@ -47,10 +58,9 @@ class TrilaterationLocalization:
             circ_x = radius*np.cos(theta)+center_x
             circ_y = radius*np.sin(theta)+center_y
 
-            self.ax.plot(center_x, center_y, marker='+', color='green')
-            self.ax.scatter(circ_x, circ_y, color='green', s=0.1)
-
-            self.ax.text(center_x, center_y, f'({center_x}, {center_y})', ha='left', va='bottom', size=8, weight='bold')
+            self.ax.plot(center_x, center_y, marker='+', color=colors[idx])
+            self.ax.scatter(circ_x, circ_y, color=colors[idx], s=0.1)
+            self.ax.text(center_x, center_y+1, f'({center_x}, {center_y})', ha='left', va='bottom', size=8, weight='bold')
 
 
 
@@ -80,3 +90,4 @@ class TrilaterationLocalization:
         self.localize(circles)
 
         plt.savefig(f'localization_figs/test_{title}.png', dpi=500)
+        
