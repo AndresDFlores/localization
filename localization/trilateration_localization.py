@@ -1,7 +1,4 @@
-from operator import itemgetter
-
 import numpy as np
-from sklearn.cluster import DBSCAN
 import matplotlib.pyplot as plt
 
 from circle_intersections import *
