@@ -76,7 +76,6 @@ class TrilaterationLocalization:
 
         #  indicate how many circles have been defined by input
         self.set_circle_count(circle_count=len(circles))
-
         self.plot_circles(circles)
         self.localize(circles)
 
