@@ -5,37 +5,47 @@ import numpy as np
 
 class PlotSpheres():
 
+    @classmethod
+    def set_color(cls, color):
+        cls.color=color
+
+
     def __init__(self):
 
         # Initialize figure and add 3D subplot
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(projection='3d')
+        self.set_color(color='blue')
 
 
-    def plot_spheres(self, spheres:list):
+    def plot_spheres(self, sphere:tuple):
 
-        for sphere in spheres:
-
-            #  Define the sphere
-            (r, x0, y0, z0) = sphere
+        #  Define the sphere
+        (r, x0, y0, z0) = sphere
 
 
-            # Generate spherical coordinates: u for azimuth, v for elevation
-            u, v = np.mgrid[0:2 * np.pi:30j, 0:np.pi:20j]  # creates a 2D meshgrid
+        # Generate spherical coordinates: u for azimuth, v for elevation
+        u, v = np.mgrid[0:2 * np.pi:30j, 0:np.pi:20j]  # creates a 2D meshgrid
 
 
-            # Convert spherical coordinates to Cartesian coordinates
-            x = r * np.cos(u) * np.sin(v) + x0
-            y = r * np.sin(u) * np.sin(v) + y0
-            z = r * np.cos(v) + z0
+        # Convert spherical coordinates to Cartesian coordinates
+        x = r * np.cos(u) * np.sin(v) + x0
+        y = r * np.sin(u) * np.sin(v) + y0
+        z = r * np.cos(v) + z0
 
 
-            # Plot the surface of the sphere
-            self.ax.plot_surface(x, y, z, alpha=0.2)
+        # Plot the surface of the sphere
+        self.ax.plot_surface(x, y, z, alpha=0.2, color=self.color)
 
 
     def plot_intersection(self, intersection:tuple):
+
+        #  plot the intersection point relative to the intersecting spheres
         self.ax.scatter(*intersection)
+
+        #  generate a title that indicates the intersection point of the spheres
+        plot_title = f'Tag Location: ({intersection[0][0]:.2f}, {intersection[1][0]:.2f}, {intersection[2][0]:.2f})'
+        self.ax.set_title(plot_title)
 
 
     def format_plots(self):# Set labels for the axes

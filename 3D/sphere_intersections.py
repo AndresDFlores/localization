@@ -1,19 +1,19 @@
 import numpy as np
 
 
-class CircleIntersections:
+class SphereIntersections:
 
     def __init__(self):
         pass
 
 
-    def get_intersections(self, circ_1:tuple, circ_2:tuple, circ_3:tuple, circ_4:tuple):
-        #  each circ_n tuple should define a circle: (radius, center_x, center_y)
+    def get_intersections(self, sphere_1:tuple, sphere_2:tuple, sphere_3:tuple, sphere_4:tuple):
+        #  each sphere_n tuple should define a circle: (radius, center_x, center_y)
 
-        r1, x1, y1, z1 = circ_1
-        r2, x2, y2, z2 = circ_2
-        r3, x3, y3, z3 = circ_3
-        r4, x4, y4, z4 = circ_4
+        r1, x1, y1, z1 = sphere_1
+        r2, x2, y2, z2 = sphere_2
+        r3, x3, y3, z3 = sphere_3
+        r4, x4, y4, z4 = sphere_4
 
         A = 2*(x2-x1)
         B = 2*(y2-y1)
