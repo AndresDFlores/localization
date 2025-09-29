@@ -41,7 +41,7 @@ class PlotSpheres():
     def plot_intersection(self, intersection:tuple):
 
         #  plot the intersection point relative to the intersecting spheres
-        self.ax.scatter(*intersection)
+        self.ax.scatter(*intersection, color='red')
 
         #  generate a title that indicates the intersection point of the spheres
         plot_title = f'Tag Location: ({intersection[0][0]:.2f}, {intersection[1][0]:.2f}, {intersection[2][0]:.2f})'
