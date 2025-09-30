@@ -10,17 +10,11 @@ class TrilaterationLocalization:
     sphere_colors = ['dodgerblue', 'green', 'orange', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
 
 
-    @classmethod
-    def set_circle_count(cls, circle_count):
-        cls.circle_count=circle_count
-
-
     def __init__(self, iter:int):
 
         self.iter=iter
 
         #  initialize vars
-        self.set_circle_count(circle_count=2)
         self.circle_intersections_class = SphereIntersections()
 
         #  initalize plots
@@ -48,12 +42,11 @@ class TrilaterationLocalization:
 
     def main(self, spheres, title):
 
-        #  indicate how many spheres have been defined by input
-        self.set_circle_count(circle_count=len(spheres))
+        #  localize tag from sphere intersections
         self.localize(spheres)
 
 
         #  plot spheres and intersection
-        self.plot_spheres_class.format_plots()
         self.plot_spheres_class.plot_intersection(self.intersection)
+        self.plot_spheres_class.format_plots()
         self.plot_spheres_class.save_plots(iter=self.iter)

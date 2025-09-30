@@ -7,7 +7,7 @@ df = pd.read_excel('coords.xlsx')
 
 for row_idx, row in df.iterrows():
 
-    trilat_localization_class = TrilaterationLocalization()
+    trilat_localization_class = TrilaterationLocalization(iter=row_idx)
 
     (r1, a1, b1) = (
         df['dist1'][row_idx],

@@ -12,7 +12,7 @@ class PlotSpheres():
 
     def __init__(self):
 
-        # Initialize figure and add 3D subplot
+        #  initialize figure and add 3D subplot
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(projection='3d')
         self.set_color(color='blue')
@@ -42,6 +42,13 @@ class PlotSpheres():
 
         #  plot the intersection point relative to the intersecting spheres
         self.ax.scatter(*intersection, color='red')
+        self.ax.plot(intersection[0], intersection[1], intersection[2], marker='o', markerfacecolor='none', markeredgecolor='red', markersize=20)
+
+        #  label intersection point
+        self.ax.text(
+            *intersection[0], *intersection[1]+1, *intersection[2], 
+            f'({round(*intersection[0], 2)}, {round(*intersection[1], 2)}, {round(*intersection[2], 2)})', 
+            ha='left', va='bottom', size=8, weight='bold', color='red')
 
         #  generate a title that indicates the intersection point of the spheres
         plot_title = f'Tag Location: ({intersection[0][0]:.2f}, {intersection[1][0]:.2f}, {intersection[2][0]:.2f})'
@@ -74,24 +81,5 @@ class PlotSpheres():
     def save_plots(self, iter):
 
         title=os.path.join('localization_figs', f'test_{iter}')
-        plt.savefig(f'{title}.png', dpi=300)
+        plt.savefig(f'{title}.png', dpi=500)
 
-
-
-if __name__=="__main__":
-
-    #  sample data
-    spheres = [
-        (4, 2, 3, 5),
-        (4, 6, 7, 8),
-        (4, 6, 5, 2),
-        (4, 8, 8, 6)
-    ]
-
-    plot_spheres_class = PlotSpheres()
-    plot_spheres_class.plot_spheres(spheres)
-    plot_spheres_class.format_plots()
-
-
-    # Display the plot
-    plt.show()
